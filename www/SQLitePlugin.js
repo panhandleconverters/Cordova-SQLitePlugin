@@ -68,8 +68,10 @@
       };
     }
     txLocks[this.dbname].queue.push(t);
-    this.startNextTransaction();
+    //this.startNextTransaction();
+    if (txLocks[this.dbname].queue.length === 1) this.startNextTransaction();
   };
+
 
   SQLitePlugin.prototype.transaction = function(fn, error, success) {
     if (!this.openDBs[this.dbname]) {
@@ -90,14 +92,18 @@
   SQLitePlugin.prototype.startNextTransaction = function() {
     var self;
     self = this;
-    nextTick(function() {
-      var txLock;
-      txLock = txLocks[self.dbname];
-      if (txLock.queue.length > 0 && !txLock.inProgress) {
-        txLock.inProgress = true;
-        txLock.queue.shift().start();
-      }
-    });
+      // nextTick(function() {
+      //console.log("startNextTransaction in next tick");
+      //nextTick(function() {
+      //  console.log("next tick:");
+        var txLock;
+        txLock = txLocks[self.dbname];
+        console.log("startNextTransaction txLock.queue.length " + txLock.queue.length + " txLock.inProgress " + txLock.inProgress);
+        if (txLock.queue.length > 0 && !txLock.inProgress) {
+          txLock.inProgress = true;
+          txLock.queue.shift().start();
+        }
+    //});
   };
 
   SQLitePlugin.prototype.open = function(success, error) {
